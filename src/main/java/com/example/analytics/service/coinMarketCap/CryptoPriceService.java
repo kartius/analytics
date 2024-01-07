@@ -1,105 +1,55 @@
 package com.example.analytics.service.coinMarketCap;
 
 import com.example.analytics.exception.coinMarketCap.ApiException;
-import com.example.analytics.model.coinMarketCap.CryptoPriceResponse;
-import org.springframework.beans.factory.annotation.Value;
+import com.example.analytics.model.coinMarketCap.CryptoCurrencyData;
+import com.example.analytics.repository.coinMarketCap.CryptoCurrencyDataRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+import java.io.IOException;
 
 import static com.example.analytics.utils.PropertiesReader.getProperty;
-import static java.util.Locale.US;
 
 @Service
 public class CryptoPriceService {
-    @Value("${crypto.api.key}")
-    private String apiKey;
-
-    @Value("${crypto.base.url}")
-    private String baseUrl;
-
-    @Value("${crypto.symbol}")
-    private String cryptocurrency;
-
-    @Value("${crypto.convert.currency}")
-    private String currency;
-
+    private final String apiUrl = getProperty("crypto.base.url");
+    private final String apiKey = getProperty("crypto.api.key");
     private final RestTemplate restTemplate;
+    private final CryptoCurrencyDataRepository cryptoCurrencyDataRepository;
 
-    public CryptoPriceService(RestTemplate restTemplate) {
+    public CryptoPriceService(RestTemplate restTemplate, CryptoCurrencyDataRepository cryptoCurrencyDataRepository) {
         this.restTemplate = restTemplate;
+        this.cryptoCurrencyDataRepository = cryptoCurrencyDataRepository;
     }
 
-    public String fetchAndFormatCryptoPrice() {
-        baseUrl = getProperty("crypto.base.url");
-        cryptocurrency = getProperty("crypto.symbol").toUpperCase();
-        currency = getProperty("crypto.convert.currency").toUpperCase();
-        apiKey = getProperty("crypto.api.key");
-        String url = String.format("%s?symbol=%s&convert=%s&CMC_PRO_API_KEY=%s", baseUrl, cryptocurrency, currency, apiKey);
-        CryptoPriceResponse response = restTemplate.getForObject(url, CryptoPriceResponse.class);
+    public String fetchCryptoPrice(String symbol, String convert) {
+        String url = String.format("%s?symbol=%s&convert=%s&CMC_PRO_API_KEY=%s", apiUrl, symbol, convert, apiKey);
+        String apiResponse = restTemplate.getForObject(url, String.class);
 
+        double yourObtainedPrice;
         try {
-            if (response != null && response.getStatus().getErrorCode() == 0) {
-                double price;
-                String formattedPrice, cryptocurrencyName;
-                switch (currency) {
-                    case "USD":
-                        switch (cryptocurrency) {
-                            case "BTC":
-                                price = response.getData().getBtcInfo().getQuote().getUsdInfo().getPrice();
-                                formattedPrice = formatPrice(price);
-                                cryptocurrencyName = "BTC";
-                                break;
-                            case "ETH":
-                                price = response.getData().getEthInfo().getQuote().getUsdInfo().getPrice();
-                                formattedPrice = formatPrice(price);
-                                cryptocurrencyName = "ETH";
-                                break;
-                            case "SOL":
-                                price = response.getData().getSolInfo().getQuote().getUsdInfo().getPrice();
-                                formattedPrice = formatPrice(price);
-                                cryptocurrencyName = "SOL";
-                                break;
-                            default:
-                                return "Unsupported cryptocurrency: " + cryptocurrency;
-                        }
-                        break;
-                    case "UAH":
-                        switch (cryptocurrency) {
-                            case "BTC":
-                                price = response.getData().getBtcInfo().getQuote().getUahInfo().getPrice();
-                                formattedPrice = formatPrice(price);
-                                cryptocurrencyName = "BTC";
-                                break;
-                            case "ETH":
-                                price = response.getData().getEthInfo().getQuote().getUahInfo().getPrice();
-                                formattedPrice = formatPrice(price);
-                                cryptocurrencyName = "ETH";
-                                break;
-                            case "SOL":
-                                price = response.getData().getSolInfo().getQuote().getUahInfo().getPrice();
-                                formattedPrice = formatPrice(price);
-                                cryptocurrencyName = "SOL";
-                                break;
-                            default:
-                                return "Unsupported cryptocurrency: " + cryptocurrency;
-                        }
-                        break;
-                    default:
-                        String errorMessage = response.getStatus().getErrorMessage();
-                        return "Error: " + errorMessage;
-                }
-                return String.format("Current price of %s: %s %s", cryptocurrencyName, formattedPrice, currency);
-            } else
-                throw new ApiException("Error: " + (response != null ? response.getStatus().getErrorMessage() : "Unknown error"));
-        } catch (Exception e) {
-            throw new ApiException("Error while fetching crypto price", e);
-        }
-    }
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(apiResponse);
+            JsonNode dataNode = rootNode.path("data");
 
-    private String formatPrice(double price) {
-        return new DecimalFormat("#,##0.00", new DecimalFormatSymbols(US)).format(price);
+            JsonNode symbolNode = dataNode.path(symbol.toUpperCase());
+            JsonNode quoteNode = symbolNode.path("quote");
+            JsonNode currencyNode = quoteNode.path(convert.toUpperCase());
+            yourObtainedPrice = currencyNode.path("price").asDouble();
+        } catch (ApiException | IOException e) {
+            System.err.println("Error: " + e.getMessage());
+            return "Failed to retrieve crypto price information.";
+        }
+
+        // Save crypto currency data to database
+        CryptoCurrencyData cryptoCurrencyData = new CryptoCurrencyData();
+        cryptoCurrencyData.setSymbol(symbol);
+        cryptoCurrencyData.setPrice(yourObtainedPrice);
+        cryptoCurrencyData.setCurrency(convert);
+        cryptoCurrencyDataRepository.save(cryptoCurrencyData);
+
+        return apiResponse;
     }
 }
