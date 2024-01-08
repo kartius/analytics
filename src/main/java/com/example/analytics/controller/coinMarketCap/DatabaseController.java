@@ -18,9 +18,9 @@ public class DatabaseController {
         this.dataBaseService = dataBaseService;
     }
 
-    @GetMapping("/by-symbol/{symbol}")
-    public List<CryptoCurrencyData> getCryptoDataBySymbol(@PathVariable String symbol) {
-        return dataBaseService.getCryptoDataBySymbol(symbol);
+    @GetMapping("/by-ticker/{ticker}")
+    public List<CryptoCurrencyData> getCryptoDataByTicker(@PathVariable String ticker) {
+        return dataBaseService.getCryptoDataByTicker(ticker);
     }
 
     @GetMapping("/by-currency/{currency}")
@@ -28,8 +28,8 @@ public class DatabaseController {
         return dataBaseService.getCryptoDataByCurrency(currency);
     }
 
-    @GetMapping("/by-symbol-and-currency/{symbol}/{currency}")
-    public List<CryptoCurrencyData> getCryptoDataBySymbolAndCurrency(@PathVariable String symbol, @PathVariable String currency) {
-        return dataBaseService.getCryptoDataBySymbolAndCurrency(symbol, currency);
+    @GetMapping("/by-ticker-and-currency/{ticker}/{currency}")
+    public List<CryptoCurrencyData> getCryptoDataByTickerAndCurrency(@PathVariable String ticker, @PathVariable String currency) {
+        return dataBaseService.getCryptoDataByTickerAndCurrency(ticker, currency);
     }
 }

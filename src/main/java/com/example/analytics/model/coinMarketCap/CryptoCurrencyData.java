@@ -14,7 +14,7 @@ public class CryptoCurrencyData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String symbol;
+    private String ticker;
     private Double price;
     private String currency;
 }

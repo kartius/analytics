@@ -14,15 +14,15 @@ public class DataBaseService {
         this.cryptoCurrencyDataRepository = cryptoCurrencyDataRepository;
     }
 
-    public List<CryptoCurrencyData> getCryptoDataBySymbol(String symbol) {
-        return cryptoCurrencyDataRepository.findBySymbol(symbol);
+    public List<CryptoCurrencyData> getCryptoDataByTicker(String ticker) {
+        return cryptoCurrencyDataRepository.findByTicker(ticker);
     }
 
     public List<CryptoCurrencyData> getCryptoDataByCurrency(String currency) {
         return cryptoCurrencyDataRepository.findByCurrency(currency);
     }
 
-    public List<CryptoCurrencyData> getCryptoDataBySymbolAndCurrency(String symbol, String currency) {
-        return cryptoCurrencyDataRepository.findBySymbolAndCurrency(symbol, currency);
+    public List<CryptoCurrencyData> getCryptoDataByTickerAndCurrency(String ticker, String currency) {
+        return cryptoCurrencyDataRepository.findByTickerAndCurrency(ticker, currency);
     }
 }

@@ -5,17 +5,21 @@ import com.example.analytics.model.coinMarketCap.CryptoCurrencyData;
 import com.example.analytics.repository.coinMarketCap.CryptoCurrencyDataRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
-import static com.example.analytics.utils.PropertiesReader.getProperty;
-
 @Service
 public class CryptoPriceService {
-    private final String apiUrl = getProperty("crypto.base.url");
-    private final String apiKey = getProperty("crypto.api.key");
+
+    @Value("${crypto.base.url}")
+    private String apiUrl;
+
+    @Value("${crypto.api.key}")
+    private String apiKey;
+
     private final RestTemplate restTemplate;
     private final CryptoCurrencyDataRepository cryptoCurrencyDataRepository;
 
@@ -24,8 +28,8 @@ public class CryptoPriceService {
         this.cryptoCurrencyDataRepository = cryptoCurrencyDataRepository;
     }
 
-    public String fetchCryptoPrice(String symbol, String convert) {
-        String url = String.format("%s?symbol=%s&convert=%s&CMC_PRO_API_KEY=%s", apiUrl, symbol, convert, apiKey);
+    public CryptoCurrencyData fetchCryptoPrice(String ticker, String convert) {
+        String url = String.format("%s?symbol=%s&convert=%s&CMC_PRO_API_KEY=%s", apiUrl, ticker, convert, apiKey);
         String apiResponse = restTemplate.getForObject(url, String.class);
 
         double yourObtainedPrice;
@@ -34,22 +38,35 @@ public class CryptoPriceService {
             JsonNode rootNode = objectMapper.readTree(apiResponse);
             JsonNode dataNode = rootNode.path("data");
 
-            JsonNode symbolNode = dataNode.path(symbol.toUpperCase());
+            JsonNode symbolNode = dataNode.path(ticker.toUpperCase());
             JsonNode quoteNode = symbolNode.path("quote");
             JsonNode currencyNode = quoteNode.path(convert.toUpperCase());
             yourObtainedPrice = currencyNode.path("price").asDouble();
         } catch (ApiException | IOException e) {
             System.err.println("Error: " + e.getMessage());
-            return "Failed to retrieve crypto price information.";
+            return null;
         }
 
         // Save crypto currency data to database
         CryptoCurrencyData cryptoCurrencyData = new CryptoCurrencyData();
-        cryptoCurrencyData.setSymbol(symbol);
+        cryptoCurrencyData.setTicker(ticker);
         cryptoCurrencyData.setPrice(yourObtainedPrice);
         cryptoCurrencyData.setCurrency(convert);
         cryptoCurrencyDataRepository.save(cryptoCurrencyData);
 
-        return apiResponse;
+        return cryptoCurrencyData;
+    }
+
+    public String getCryptoPrice(String ticker, String convert) {
+        CryptoCurrencyData cryptoCurrencyData = fetchCryptoPrice(ticker, convert);
+
+        if (cryptoCurrencyData != null) {
+            double price = cryptoCurrencyData.getPrice();
+            return String.format("Current price of %s: %.2f %s",
+                    ticker.toUpperCase(),
+                    price, convert.toUpperCase());
+        } else {
+            return "Failed to retrieve crypto price information.";
+        }
     }
 }
