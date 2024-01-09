@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: AnalyticsSpringApplication
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /api-docs-swagger-ui.html
+    operations-sorter: method
