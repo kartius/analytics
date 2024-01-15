@@ -2,12 +2,14 @@ package com.example.analytics.service.telegram.bot.impl;
 
 import com.example.analytics.service.telegram.bot.Bot;
 import com.example.analytics.service.telegram.handler.CommandHandler;
+import com.example.analytics.service.telegram.handler.MessageHandler;
 import com.example.analytics.service.telegram.util.Message;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -29,9 +31,11 @@ public class TelegramBotWebhook extends SpringWebhookBot implements Bot, Command
     String startupMessage;
     boolean isDeafModeEnabled;
     boolean isEchoModeEnabled;
+    MessageHandler<TelegramBotWebhook> messageHandler;
 
     public TelegramBotWebhook(@NotNull Builder builder) {
-        super(builder.setWebhook);
+        super(new DefaultBotOptions(), builder.setWebhook, builder.botToken);
+
         this.botPath = builder.botPath;
         this.botUsername = builder.botUsername;
         this.botToken = builder.botToken;
@@ -39,6 +43,8 @@ public class TelegramBotWebhook extends SpringWebhookBot implements Bot, Command
         this.startupMessage = builder.startupMessage;
         this.isDeafModeEnabled = builder.isDeafModeEnabled;
         this.isEchoModeEnabled = builder.isEchoModeEnabled;
+
+        this.messageHandler = new MessageHandler<>(this);
 
         try {
             this.execute(new SetMyCommands(LIST_OF_COMMANDS, new BotCommandScopeDefault(), null));
@@ -49,78 +55,13 @@ public class TelegramBotWebhook extends SpringWebhookBot implements Bot, Command
 
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(@NotNull Update update) {
-        Long chatId;
-        Long userId;
-        String userName;
-        String messageText;
-
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            chatId = update.getMessage().getChatId();
-            userId = update.getMessage().getFrom().getId();
-            userName = update.getMessage().getFrom().getFirstName();
-            messageText = update.getMessage().getText();
-            botAnswerUtils(messageText, chatId, userName);
-        } else if (update.hasCallbackQuery()) {
-            chatId = update.getCallbackQuery().getMessage().getChatId();
-            userId = update.getCallbackQuery().getFrom().getId();
-            userName = update.getCallbackQuery().getFrom().getFirstName();
-            messageText = update.getCallbackQuery().getData();
-            botAnswerUtils(messageText, chatId, userName);
-        }
+        messageHandler.onUpdateReceived(update);
         return null;
-    }
-
-    private void botAnswerUtils(@NotNull String messageText, Long chatId, String userName) {
-        if (!isDeafModeEnabled()) {
-            switch (messageText) {
-                case "/analytic":
-                    sendActualAnalyticData(chatId, userName);
-                    break;
-                case "/start":
-                    sendStartMessage(chatId, userName);
-                    break;
-                case "/help":
-                    sendHelpMessage(chatId, userName);
-                    break;
-                default:
-                    if (isEchoModeEnabled()) {
-                        sendMessage(Message.of(chatId, messageText));
-                    }
-                    //log.info("Unexpected message");
-            }
-        }
-    }
-
-    private void sendActualAnalyticData(Long chatId, String userName) {
-        // ***************************************************************************************
-        // here we call a method that will start collecting fresh analytics data from another bean
-        // the analytics collection method must return a string
-        // ***************************************************************************************
-        final String actualAnalyticData = "New analytic data here!";
-
-        final String text = "*" + userName + "*, here you are.\n\n" + actualAnalyticData;
-        sendMessage(Message.of(chatId, text));
-    }
-
-    private void sendStartMessage(Long chatId, String userName) {
-        sendMessage(Message.of(chatId, "Hello, *" + userName + "*!\n" +
-                "I'm a *" + getBotUsername() + "*."));
-    }
-
-    private void sendHelpMessage(Long chatId, String userName) {
-        sendMessage(Message.of(chatId, "Hello, *" + userName + "*!\n" + HELP_TEXT));
     }
 
     @Override
     public void sendMessage(SendMessage message) {
-        try {
-            this.execute(message);
-            final String logText = "Telegram bot sent message";
-            log.info(logText);
-            log.debug(logText.concat(": ").concat(message.getText()));
-        } catch (TelegramApiException e) {
-            log.error(e.getMessage(), e);
-        }
+        messageHandler.send(message);
     }
 
     @Override
