@@ -21,7 +21,8 @@ public class WebhookSwitch {
         final JSONObject object = JSONModelObjectParser.getObject(urlRequest);
 
         model.setOk(object.getBoolean("ok"));
-        model.setResult(object.getBoolean("result"));
+        model.setResult(object.optBoolean("result", false));
+        model.setError_code(object.optInt("error_code", -1));
         model.setDescription(object.getString("description"));
 
         return model;

@@ -10,5 +10,6 @@ public class WebhookSwitchModel {
 
     boolean ok;
     boolean result;
+    int error_code;
     String description;
 }

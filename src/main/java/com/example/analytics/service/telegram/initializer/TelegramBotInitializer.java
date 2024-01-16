@@ -76,14 +76,15 @@ public class TelegramBotInitializer {
     }
 
     private void webhookModeStatusControl() throws IOException {
-        final String switchErrorMessage = "It wasn't possible to get the correct answer " +
-                "after trying to switch the webhook mode via \n" + config.getTelegramApiUrl() + "\n" +
-                "Check the status of your network connection and try again.";
+        final String switchErrorMessage = "An unknown error occurred while trying to switch webhook mode.\n" +
+                "Check your internet connection and try again.\n" +
+                "If the error persists, check the bot.webhook-path settings, most likely the error is there.";
 
         WebhookSwitchModel model;
         switch (config.getBotMainMode()) {
             case ("polling") -> {
                 if (isWebhookActivated) {
+                    log.info("Trying to switch telegram bot in to polling mode...");
                     model = webhookSwitch.toggleSwitch(telegramApiRequestUrl.getWebhookTurnOffRequestUrl());
                     if (model.getDescription()
                             .equals(WebhookTelegramDescriptionAnswer.WEBHOOK_DISABLED_ANSWER.getAnswer())) {
@@ -91,18 +92,26 @@ public class TelegramBotInitializer {
                         log.info("Webhook mode successfully turned off");
                     } else {
                         log.error(switchErrorMessage);
+                        throw new RuntimeException(switchErrorMessage);
                     }
                 }
             }
             case ("webhook") -> {
                 if (!isWebhookActivated) {
+                    log.info("Trying to switch telegram bot in to webhook mode...");
                     model = webhookSwitch.toggleSwitch(telegramApiRequestUrl.getWebhookTurnOnRequestUrl());
                     if (model.getDescription()
                             .equals(WebhookTelegramDescriptionAnswer.WEBHOOK_ENABLED_ANSWER.getAnswer())) {
                         this.isWebhookActivated = true;
                         log.info("Webhook mode successfully turned on");
+                    } else if (!model.isOk()
+                            && model.getError_code() == 400
+                            && model.getDescription().contains(WebhookTelegramDescriptionAnswer.WEBHOOK_BAD_REQUEST.getAnswer())) {
+                        log.error(model.getDescription());
+                        throw new RuntimeException(model.getDescription());
                     } else {
                         log.error(switchErrorMessage);
+                        throw new RuntimeException(switchErrorMessage);
                     }
                 }
             }

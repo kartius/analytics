@@ -12,7 +12,8 @@ public enum WebhookTelegramDescriptionAnswer {
 
     WEBHOOK_ENABLED_ANSWER("Webhook was set"),
     WEBHOOK_DISABLED_ANSWER("Webhook was deleted"),
-    WEBHOOK_IS_ALREADY_DELETED("Webhook is already deleted");
+    WEBHOOK_IS_ALREADY_DELETED("Webhook is already deleted"),
+    WEBHOOK_BAD_REQUEST("Bad Request");
 
     String answer;
 }
