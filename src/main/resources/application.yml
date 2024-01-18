@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: AnalyticsSpringApplication
+# Spring settings
+  datasource:
+    url: jdbc:mysql://localhost:3306/smartstorage
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 1234
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /api-docs-swagger-ui.html
+    operations-sorter: method
+
+# Local server port
+server:
+  port: 9090
+
+# API key for CoinMarketCap
+crypto:
+  api:
+    key: 3c6ca286-a0b1-4da4-8657-29ee33f2e27c
+# API endpoint url
+  base:
+    url: https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest
+
+# Log level in console
+logging:
+  level:
+    root: INFO
+
