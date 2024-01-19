@@ -1,6 +1,6 @@
 package com.example.analytics.service.telegram.util;
 
-import com.example.analytics.config.TelegramBotConfig;
+import com.example.analytics.config.telegram.TelegramBotConfig;
 import com.example.analytics.service.telegram.model.WebhookResultModel;
 import com.example.analytics.service.telegram.model.WebhookStatusInfoModel;
 import com.example.analytics.service.telegram.service.WebhookStatusInfo;

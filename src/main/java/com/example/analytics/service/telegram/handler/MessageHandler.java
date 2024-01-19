@@ -1,6 +1,6 @@
 package com.example.analytics.service.telegram.handler;
 
-import com.example.analytics.config.TelegramBotConfig;
+import com.example.analytics.config.telegram.TelegramBotConfig;
 import com.example.analytics.service.telegram.util.Message;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;

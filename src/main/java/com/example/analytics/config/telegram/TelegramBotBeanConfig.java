@@ -1,4 +1,4 @@
-package com.example.analytics.config;
+package com.example.analytics.config.telegram;
 
 import com.example.analytics.service.telegram.bot.Bot;
 import com.example.analytics.service.telegram.bot.instance.BotInstance;

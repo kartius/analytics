@@ -1,6 +1,6 @@
 package com.example.analytics.service.telegram.initializer;
 
-import com.example.analytics.config.TelegramBotConfig;
+import com.example.analytics.config.telegram.TelegramBotConfig;
 import com.example.analytics.service.telegram.bot.Bot;
 import com.example.analytics.service.telegram.bot.impl.TelegramBotPolling;
 import com.example.analytics.service.telegram.bot.impl.TelegramBotWebhook;

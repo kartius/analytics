@@ -1,4 +1,4 @@
-package com.example.analytics.config;
+package com.example.analytics.config.telegram;
 
 import lombok.AccessLevel;
 import lombok.Getter;

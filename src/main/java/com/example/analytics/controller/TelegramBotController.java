@@ -1,6 +1,6 @@
 package com.example.analytics.controller;
 
-import com.example.analytics.config.TelegramBotConfig;
+import com.example.analytics.config.telegram.TelegramBotConfig;
 import com.example.analytics.service.telegram.bot.Bot;
 import com.example.analytics.service.telegram.bot.impl.TelegramBotWebhook;
 import com.example.analytics.service.telegram.bot.instance.BotInstance;
