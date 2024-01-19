@@ -36,6 +36,8 @@
             <version>24.1.0</version>
             <scope>compile</scope>
         </dependency>
+
+
         <dependency>
             <groupId>org.telegram</groupId>
             <artifactId>telegrambots-spring-boot-starter</artifactId>
