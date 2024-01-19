@@ -13,7 +13,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>analytics</name>
     <properties>
-        <java.version>21</java.version>
+        <java.version>19</java.version>
     </properties>
     <dependencies>
         <dependency>
@@ -59,11 +59,6 @@
             <artifactId>annotations</artifactId>
             <version>24.1.0</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.4.0-b180830.0359</version>
         </dependency>
     </dependencies>
 
