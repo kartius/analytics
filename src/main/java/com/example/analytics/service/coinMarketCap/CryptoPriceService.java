@@ -5,6 +5,7 @@ import com.example.analytics.model.coinMarketCap.CryptoCurrencyData;
 import com.example.analytics.repository.coinMarketCap.CryptoCurrencyDataRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 
 @Service
+@Slf4j
 public class CryptoPriceService {
 
     @Value("${crypto.base.url}")
@@ -43,7 +45,7 @@ public class CryptoPriceService {
             JsonNode currencyNode = quoteNode.path(convert.toUpperCase());
             yourObtainedPrice = currencyNode.path("price").asDouble();
         } catch (ApiException | IOException e) {
-            System.err.println("Error: " + e.getMessage());
+            log.error("Error: {}",e.getMessage());
             return null;
         }
 
