@@ -1,4 +1,4 @@
-package com.example.analytics;
+package com.example.analytics.service.googleTrend.utils;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -37,15 +37,6 @@ public class GoogleTrendsScraper {
         } catch (IOException e) {
             log.error("Error connecting to Google Trends", e);
             throw new IOException("Error connecting to Google Trends", e);
-        }
-    }
-
-    public static void main(String[] args) {
-        try {
-            String trendsData = getGoogleTrendsData("crypto", "US");
-            System.out.println(trendsData);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

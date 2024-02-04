@@ -38,3 +38,9 @@ crypto:
 logging:
   level:
     root: INFO
+google:
+  api:
+    username: maryalex.m96@gmail.com
+    password: P@ssw0rd27960000
+    url: https://trends.google.com/trends/
+    key: AIzaSyDNKfrQrcXgjdqi-EN3_Hu-SL1aLhF6DMg
